@@ -1,0 +1,29 @@
+{
+  "name": "ecoop18-pull-stream-experiments",
+  "version": "1.0.0",
+  "description": "Experiment performed for the ecoop18 paper on pull-streams.",
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "tape test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elavoie/ecoop18-pull-stream-experiments.git"
+  },
+  "author": "Erick Lavoie",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elavoie/ecoop18-pull-stream-experiments/issues"
+  },
+  "homepage": "https://github.com/elavoie/ecoop18-pull-stream-experiments#readme",
+  "dependencies": {
+    "pull-stream": "^3.6.1",
+    "pull-stream-protocol-checker": "^1.1.1",
+    "pull-stream-protocol-reifier": "^2.0.2",
+    "pull-stream-reference-modules": "^1.1.0",
+    "tape": "^4.8.0"
+  }
+}
