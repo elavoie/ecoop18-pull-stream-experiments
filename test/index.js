@@ -597,3 +597,452 @@ tape('Testing pull.reduce()', function (t) {
     })
   )
 })
+
+tape('Testing pull.map()', function (t) {
+  var numberOfTests = 0
+  pull(
+    helpers.combinations({
+      'source-n': [0, 1, 2],
+      'source-done': [true, new Error('Source Error')],
+      'source-sync': [true, false],
+      'sink-r': [1, 2, 3, 4, 5, 6],
+      'sink-abort': [true, new Error('Sink Error')],
+      'sink-answer': [true],
+      'sink-sync': [true, false],
+      'sink-cont': [false]
+    }),
+    pull.through(function (args) {
+      log(args)
+    }),
+    pull.asyncMap(function (args, cb) {
+      var probe1 = checker(true, true, false)
+      var probe2 = checker(true, true, false)
+      pull(
+        reference.source.call(null,
+          args['source-n'],
+          args['source-done'],
+          args['source-sync']
+        ),
+        probe1,
+        pull.map(function (x) { return x }),
+        probe2,
+        reference.sink.call(null,
+          args['sink-r'],
+          args['sink-r'],
+          args['sink-abort'],
+          args['sink-answer'],
+          args['sink-sync'],
+          args['sink-cont'],
+          function () { cb(null, probe1.terminate().concat(probe2.terminate())) }
+        )
+      )
+    }),
+    pull.through(function () { numberOfTests++ }),
+    pull.filter(function (errors) { return errors.length > 0 }),
+    pull.collect(function (err, results) {
+      if (err) t.fail(err)
+      else if (results.length > 0) t.fail('Protocol violations for ' + (results.length) + '/' + numberOfTests + ' tests')
+      else {
+        t.equal(results.length, 0)
+        log('All ' + numberOfTests + ' tests successful')
+      }
+      t.end()
+    })
+  )
+})
+
+tape('Testing pull.asyncMap()', function (t) {
+  var numberOfTests = 0
+  pull(
+    helpers.combinations({
+      'source-n': [0, 1, 2],
+      'source-done': [true, new Error('Source Error')],
+      'source-sync': [true, false],
+      'asyncMap-index': [Infinity, 1, 2],
+      'asyncMap-abort': [true, new Error('asyncMap Error')],
+      'sink-r': [1, 2, 3, 4, 5, 6],
+      'sink-abort': [true, new Error('Sink Error')],
+      'sink-answer': [true],
+      'sink-sync': [true, false],
+      'sink-cont': [false]
+    }),
+    pull.through(function (args) {
+      log(args)
+    }),
+    pull.asyncMap(function (args, cb) {
+      var probe1 = checker(true, true, false)
+      var probe2 = checker(true, true, false)
+      var i = 1
+      pull(
+        reference.source.call(null,
+          args['source-n'],
+          args['source-done'],
+          args['source-sync']
+        ),
+        probe1,
+        pull.asyncMap(function (x, cb) {
+          if (i === args['asyncMap-index']) return cb(args['asyncMap-abort'])
+          else return cb(false, x)
+        }),
+        probe2,
+        reference.sink.call(null,
+          args['sink-r'],
+          args['sink-r'],
+          args['sink-abort'],
+          args['sink-answer'],
+          args['sink-sync'],
+          args['sink-cont'],
+          function () { cb(null, probe1.terminate().concat(probe2.terminate())) }
+        )
+      )
+    }),
+    pull.through(function () { numberOfTests++ }),
+    pull.filter(function (errors) { return errors.length > 0 }),
+    pull.collect(function (err, results) {
+      if (err) t.fail(err)
+      else if (results.length > 0) t.fail('Protocol violations for ' + (results.length) + '/' + numberOfTests + ' tests')
+      else {
+        t.equal(results.length, 0)
+        log('All ' + numberOfTests + ' tests successful')
+      }
+      t.end()
+    })
+  )
+})
+
+tape('Testing pull.filter()', function (t) {
+  var numberOfTests = 0
+  pull(
+    helpers.combinations({
+      'source-n': [0, 1, 2],
+      'source-done': [true, new Error('Source Error')],
+      'source-sync': [true, false],
+      'sink-r': [1, 2, 3, 4, 5, 6],
+      'sink-abort': [true, new Error('Sink Error')],
+      'sink-answer': [true],
+      'sink-sync': [true, false],
+      'sink-cont': [false]
+    }),
+    pull.through(function (args) {
+      log(args)
+    }),
+    pull.asyncMap(function (args, cb) {
+      var probe1 = checker(true, true, false)
+      var probe2 = checker(true, true, false)
+      pull(
+        reference.source.call(null,
+          args['source-n'],
+          args['source-done'],
+          args['source-sync']
+        ),
+        probe1,
+        pull.filter(function (x) { return (x % 2) === 0 }),
+        probe2,
+        reference.sink.call(null,
+          args['sink-r'],
+          args['sink-r'],
+          args['sink-abort'],
+          args['sink-answer'],
+          args['sink-sync'],
+          args['sink-cont'],
+          function () { cb(null, probe1.terminate().concat(probe2.terminate())) }
+        )
+      )
+    }),
+    pull.through(function () { numberOfTests++ }),
+    pull.filter(function (errors) { return errors.length > 0 }),
+    pull.collect(function (err, results) {
+      if (err) t.fail(err)
+      else if (results.length > 0) t.fail('Protocol violations for ' + (results.length) + '/' + numberOfTests + ' tests')
+      else {
+        t.equal(results.length, 0)
+        log('All ' + numberOfTests + ' tests successful')
+      }
+      t.end()
+    })
+  )
+})
+
+tape('Testing pull.filterNot()', function (t) {
+  var numberOfTests = 0
+  pull(
+    helpers.combinations({
+      'source-n': [0, 1, 2],
+      'source-done': [true, new Error('Source Error')],
+      'source-sync': [true, false],
+      'sink-r': [1, 2, 3, 4, 5, 6],
+      'sink-abort': [true, new Error('Sink Error')],
+      'sink-answer': [true],
+      'sink-sync': [true, false],
+      'sink-cont': [false]
+    }),
+    pull.through(function (args) {
+      log(args)
+    }),
+    pull.asyncMap(function (args, cb) {
+      var probe1 = checker(true, true, false)
+      var probe2 = checker(true, true, false)
+      pull(
+        reference.source.call(null,
+          args['source-n'],
+          args['source-done'],
+          args['source-sync']
+        ),
+        probe1,
+        pull.filterNot(function (x) { return (x % 2) === 0 }),
+        probe2,
+        reference.sink.call(null,
+          args['sink-r'],
+          args['sink-r'],
+          args['sink-abort'],
+          args['sink-answer'],
+          args['sink-sync'],
+          args['sink-cont'],
+          function () { cb(null, probe1.terminate().concat(probe2.terminate())) }
+        )
+      )
+    }),
+    pull.through(function () { numberOfTests++ }),
+    pull.filter(function (errors) { return errors.length > 0 }),
+    pull.collect(function (err, results) {
+      if (err) t.fail(err)
+      else if (results.length > 0) t.fail('Protocol violations for ' + (results.length) + '/' + numberOfTests + ' tests')
+      else {
+        t.equal(results.length, 0)
+        log('All ' + numberOfTests + ' tests successful')
+      }
+      t.end()
+    })
+  )
+})
+
+tape('Testing pull.unique()', function (t) {
+  var numberOfTests = 0
+  pull(
+    helpers.combinations({
+      'source-n': [0, 1, 2, 10],
+      'source-done': [true, new Error('Source Error')],
+      'source-sync': [true, false],
+      'sink-r': [1, 2, 3, 4, 5, 6],
+      'sink-abort': [true, new Error('Sink Error')],
+      'sink-answer': [true],
+      'sink-sync': [true, false],
+      'sink-cont': [false]
+    }),
+    pull.through(function (args) {
+      log(args)
+    }),
+    pull.asyncMap(function (args, cb) {
+      var probe1 = checker(true, true, false)
+      var probe2 = checker(true, true, false)
+      pull(
+        reference.source.call(null,
+          args['source-n'],
+          args['source-done'],
+          args['source-sync']
+        ),
+        pull.map(function (x) { return x % 2 }),
+        probe1,
+        pull.unique(),
+        probe2,
+        reference.sink.call(null,
+          args['sink-r'],
+          args['sink-r'],
+          args['sink-abort'],
+          args['sink-answer'],
+          args['sink-sync'],
+          args['sink-cont'],
+          function () { cb(null, probe1.terminate().concat(probe2.terminate())) }
+        )
+      )
+    }),
+    pull.through(function () { numberOfTests++ }),
+    pull.filter(function (errors) { return errors.length > 0 }),
+    pull.collect(function (err, results) {
+      if (err) t.fail(err)
+      else if (results.length > 0) t.fail('Protocol violations for ' + (results.length) + '/' + numberOfTests + ' tests')
+      else {
+        t.equal(results.length, 0)
+        log('All ' + numberOfTests + ' tests successful')
+      }
+      t.end()
+    })
+  )
+})
+
+tape('Testing pull.nonUnique()', function (t) {
+  var numberOfTests = 0
+  pull(
+    helpers.combinations({
+      'source-n': [0, 1, 2, 10],
+      'source-done': [true, new Error('Source Error')],
+      'source-sync': [true, false],
+      'sink-r': [1, 2, 3, 4, 5, 6],
+      'sink-abort': [true, new Error('Sink Error')],
+      'sink-answer': [true],
+      'sink-sync': [true, false],
+      'sink-cont': [false]
+    }),
+    pull.through(function (args) {
+      log(args)
+    }),
+    pull.asyncMap(function (args, cb) {
+      var probe1 = checker(true, true, false)
+      var probe2 = checker(true, true, false)
+      pull(
+        reference.source.call(null,
+          args['source-n'],
+          args['source-done'],
+          args['source-sync']
+        ),
+        pull.map(function (x) { return x % 2 }),
+        probe1,
+        pull.nonUnique(),
+        probe2,
+        reference.sink.call(null,
+          args['sink-r'],
+          args['sink-r'],
+          args['sink-abort'],
+          args['sink-answer'],
+          args['sink-sync'],
+          args['sink-cont'],
+          function () { cb(null, probe1.terminate().concat(probe2.terminate())) }
+        )
+      )
+    }),
+    pull.through(function () { numberOfTests++ }),
+    pull.filter(function (errors) { return errors.length > 0 }),
+    pull.collect(function (err, results) {
+      if (err) t.fail(err)
+      else if (results.length > 0) t.fail('Protocol violations for ' + (results.length) + '/' + numberOfTests + ' tests')
+      else {
+        t.equal(results.length, 0)
+        log('All ' + numberOfTests + ' tests successful')
+      }
+      t.end()
+    })
+  )
+})
+
+tape('Testing pull.take()', function (t) {
+  var numberOfTests = 0
+  pull(
+    helpers.combinations({
+      'source-n': [0, 1, 2, 10],
+      'source-done': [true, new Error('Source Error')],
+      'source-sync': [true, false],
+      'take-test': [0, 1, 2, 10, 12, function (x) { return x % 2 !== 1 }],
+      'take-last': [false, true],
+      'sink-r': [1, 2, 3, 4, 5, 6],
+      'sink-abort': [true, new Error('Sink Error')],
+      'sink-answer': [true],
+      'sink-sync': [true, false],
+      'sink-cont': [false]
+    }),
+    pull.through(function (args) {
+      log(args)
+    }),
+    pull.asyncMap(function (args, cb) {
+      var probe1 = checker(true, true, false)
+      var probe2 = checker(true, true, false)
+      pull(
+        reference.source.call(null,
+          args['source-n'],
+          args['source-done'],
+          args['source-sync']
+        ),
+        pull.map(function (x) { return x % 2 }),
+        probe1,
+        pull.take(args['take-test'], args['take-last'] ? {last: true} : undefined),
+        probe2,
+        reference.sink.call(null,
+          args['sink-r'],
+          args['sink-r'],
+          args['sink-abort'],
+          args['sink-answer'],
+          args['sink-sync'],
+          args['sink-cont'],
+          function () { cb(null, probe1.terminate().concat(probe2.terminate())) }
+        )
+      )
+    }),
+    pull.through(function () { numberOfTests++ }),
+    pull.filter(function (errors) { return errors.length > 0 }),
+    pull.collect(function (err, results) {
+      if (err) t.fail(err)
+      else if (results.length > 0) t.fail('Protocol violations for ' + (results.length) + '/' + numberOfTests + ' tests')
+      else {
+        t.equal(results.length, 0)
+        log('All ' + numberOfTests + ' tests successful')
+      }
+      t.end()
+    })
+  )
+})
+
+tape('Testing pull.flatten()', function (t) {
+  var numberOfTests = 0
+  var values = [[], [1], [2, 3, 4]]
+  pull(
+    helpers.combinations({
+      'source-n': [0, 1, 2],
+      'source-done': [true, new Error('Source Error')],
+      'source-sync': [true, false],
+      'values-permutation': [
+        [0, 1, 2],
+        [0, 2, 1],
+        [1, 0, 2],
+        [1, 2, 0],
+        [2, 0, 1],
+        [2, 1, 0]
+      ],
+      'values-as-stream': [true, false],
+      'sink-r': [1, 2, 3, 4],
+      'sink-abort': [true, new Error('Sink Error')],
+      'sink-answer': [true],
+      'sink-sync': [true, false],
+      'sink-cont': [false]
+    }),
+    pull.through(function (args) {
+      log(args)
+    }),
+    pull.asyncMap(function (args, cb) {
+      var probe1 = checker(true, true, false)
+      var probe2 = checker(true, true, false)
+      pull(
+        reference.source.call(null,
+          args['source-n'],
+          args['source-done'],
+          args['source-sync']
+        ),
+        pull.map(function (i) {
+          var ary = values[args['values-permutation'][i - 1]]
+          return args['values-as-stream'] ? pull.values(ary) : ary
+        }),
+        probe1,
+        pull.flatten(),
+        probe2,
+        reference.sink.call(null,
+          args['sink-r'],
+          args['sink-r'],
+          args['sink-abort'],
+          args['sink-answer'],
+          args['sink-sync'],
+          args['sink-cont'],
+          function () { cb(null, probe1.terminate().concat(probe2.terminate())) }
+        )
+      )
+    }),
+    pull.through(function () { numberOfTests++ }),
+    pull.filter(function (errors) { return errors.length > 0 }),
+    pull.collect(function (err, results) {
+      if (err) t.fail(err)
+      else if (results.length > 0) t.fail('Protocol violations for ' + (results.length) + '/' + numberOfTests + ' tests')
+      else {
+        t.equal(results.length, 0)
+        log('All ' + numberOfTests + ' tests successful')
+      }
+      t.end()
+    })
+  )
+})

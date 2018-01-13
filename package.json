@@ -7,7 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "tape test/index.js"
+    "test": "tape test/index.js",
+    "take-test": "tape test/take.js"
   },
   "repository": {
     "type": "git",
@@ -21,9 +22,9 @@
   "homepage": "https://github.com/elavoie/ecoop18-pull-stream-experiments#readme",
   "dependencies": {
     "pull-stream": "^3.6.1",
-    "pull-stream-protocol-checker": "^1.1.1",
+    "pull-stream-protocol-checker": "^1.2.0",
     "pull-stream-protocol-reifier": "^2.0.2",
-    "pull-stream-reference-modules": "^1.1.0",
+    "pull-stream-reference-modules": "^1.1.1",
     "tape": "^4.8.0"
   }
 }
